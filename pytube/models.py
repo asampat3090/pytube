@@ -114,7 +114,7 @@ class Video(object):
             raise KeyboardInterrupt(
                 "Interrupt signal given. Deleting incomplete video.")
 
-    def download_s3(self, s3_bucket_name, chunk_size=8 * 1024, on_progress=None,
+    def download_s3(self, s3_bucket_name, video_dir='', chunk_size=8 * 1024, on_progress=None,
                  on_finish=None):
         """
         Downloads video to S3
@@ -125,6 +125,8 @@ class Video(object):
         # Setup AWS S3 connections
         s3_connection = boto.connect_s3()
         video_key_name = "{0}.{1}".format(self.filename, self.extension)
+        if video_dir:
+            video_key_name = os.path.join(video_dir, video_key_name)
         video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_name)
 
         # Download the video
