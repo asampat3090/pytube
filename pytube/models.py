@@ -4,6 +4,10 @@ from __future__ import unicode_literals
 import os
 from time import clock
 
+# AWS libraries
+import boto
+from s3file import s3open
+
 try:
     from urllib2 import urlopen
 except ImportError:
@@ -107,6 +111,53 @@ class Video(object):
             # should be taken care of by the client. Also you should be allowed
             # to disable this.
             os.remove(path)
+            raise KeyboardInterrupt(
+                "Interrupt signal given. Deleting incomplete video.")
+
+    def download_s3(self, s3_bucket_name, chunk_size=8 * 1024, on_progress=None,
+                 on_finish=None):
+        """
+        Downloads video to S3
+
+        :param str s3_bucket_name:
+            S3 bucket name with output directory
+        """
+        # Setup AWS S3 connections
+        s3_connection = boto.connect_s3()
+        video_key_name = "{0}.{1}".format(self.filename, self.extension)
+        video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_name)
+
+        # Download the video
+        response = urlopen(self.url)
+        meta_data = dict(response.info().items())
+        file_size = int(meta_data.get("Content-Length") or
+                        meta_data.get("content-length"))
+        self._bytes_received = 0
+        start = clock()
+
+        try:
+            with s3open(video_key.generate_url(60), create=False) as dst_file:
+                while True:
+                    self._buffer = response.read(chunk_size)
+                    # Check if the buffer is empty (aka no bytes remaining).
+                    if not self._buffer:
+                        if on_finish:
+                            # TODO: We possibly want to flush the
+                            # `_bytes_recieved`` buffer before we call
+                            # ``on_finish()``.
+                            on_finish(path)
+                        break
+
+                    self._bytes_received += len(self._buffer)
+                    dst_file.write(self._buffer)
+                    if on_progress:
+                        on_progress(self._bytes_received, file_size, start)
+
+        except KeyboardInterrupt:
+            # TODO: Move this into the cli, ``KeyboardInterrupt`` handling
+            # should be taken care of by the client. Also you should be allowed
+            # to disable this.
+            video_key.delete()
             raise KeyboardInterrupt(
                 "Interrupt signal given. Deleting incomplete video.")
 
