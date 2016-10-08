@@ -35,6 +35,31 @@ QUALITY_PROFILES = {
     83: ("mp4", "240p", "H.264", "3D", "0.5", "AAC", "96"),
     84: ("mp4", "720p", "H.264", "3D", "2-2.9", "AAC", "152"),
     85: ("mp4", "1080p", "H.264", "3D", "2-2.9", "AAC", "152"),
+
+    160: ("mp4", "144p", "H.264", "Main", "0.1", "", ""),
+    133: ("mp4", "240p", "H.264", "Main", "0.2-0.3", "", ""),
+    134: ("mp4", "360p", "H.264", "Main", "0.3-0.4", "", ""),
+    135: ("mp4", "480p", "H.264", "Main", "0.5-1", "", ""),
+    136: ("mp4", "720p", "H.264", "Main", "1-1.5", "", ""),
+    298: ("mp4", "720p HFR", "H.264", "Main", "3-3.5", "", ""),
+
+    137: ("mp4", "1080p", "H.264", "High", "2.5-3", "", ""),
+    299: ("mp4", "1080p HFR", "H.264", "High", "5.5", "", ""),
+    264: ("mp4", "2160p-2304p", "H.264", "High", "12.5-16", "", ""),
+    266: ("mp4", "2160p-4320p", "H.264", "High", "13.5-25", "", ""),
+
+    242: ("webm", "240p", "vp9", "n/a", "0.1-0.2", "", ""),
+    243: ("webm", "360p", "vp9", "n/a", "0.25", "", ""),
+    244: ("webm", "480p", "vp9", "n/a", "0.5", "", ""),
+    247: ("webm", "720p", "vp9", "n/a", "0.7-0.8", "", ""),
+    248: ("webm", "1080p", "vp9", "n/a", "1.5", "", ""),
+    271: ("webm", "1440p", "vp9", "n/a", "9", "", ""),
+    278: ("webm", "144p 15 fps", "vp9", "n/a", "0.08", "", ""),
+    302: ("webm", "720p HFR", "vp9", "n/a", "2.5", "", ""),
+    303: ("webm", "1080p HFR", "vp9", "n/a", "5", "", ""),
+    308: ("webm", "1440p HFR", "vp9", "n/a", "10", "", ""),
+    313: ("webm", "2160p", "vp9", "n/a", "13-15", "", ""),
+    315: ("webm", "2160p HFR", "vp9", "n/a", "20-25", "", "")
 }
 
 # The keys corresponding to the quality/codec map above.
@@ -170,7 +195,7 @@ class YouTube(object):
 
         # For each video url, identify the quality profile and add it to list
         # of available videos.
-        for idx, url in enumerate(video_urls):
+        for i, url in enumerate(video_urls):
             log.debug("attempting to get quality profile from url: %s", url)
             try:
                 itag, quality_profile = self._get_quality_profile_from_url(url)
@@ -186,7 +211,7 @@ class YouTube(object):
             if "signature=" not in url:
                 log.debug("signature not in url, attempting to resolve the "
                           "cipher.")
-                signature = self._get_cipher(stream_map["s"][idx], js_url)
+                signature = self._get_cipher(stream_map["s"][i], js_url)
                 url = "{0}&signature={1}".format(url, signature)
             self._add_video(url, self.filename, **quality_profile)
         # Clear the cached js. Make sure to keep this at the end of
@@ -336,7 +361,7 @@ class YouTube(object):
         """
         unmatched_brackets_num = 0
         index = 1
-        for idx, ch in enumerate(html):
+        for i, ch in enumerate(html):
             if isinstance(ch, int):
                 ch = chr(ch)
             if ch == "{":
@@ -347,7 +372,7 @@ class YouTube(object):
                     break
         else:
             raise PytubeError("Unable to determine json offset.")
-        return index + idx
+        return index + i
 
     def _get_cipher(self, signature, url):
         """Gets the signature using the cipher.
@@ -363,7 +388,7 @@ class YouTube(object):
             response = urlopen(url)
             if not response:
                 raise PytubeError("Unable to open url: {0}".format(self.url))
-            self._js_cache = response.read()
+            self._js_cache = response.read().decode()
         try:
             matches = reg_exp.search(self._js_cache)
             if matches:

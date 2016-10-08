@@ -6,10 +6,6 @@ pytube
   :alt: Pypi
   :target: https://pypi.python.org/pypi/pytube/
 
-.. image:: https://img.shields.io/pypi/dm/pytube.svg
-  :alt: Pypi downloads per month
-  :target: https://pypi.python.org/pypi/pytube/
-
 .. image:: https://img.shields.io/pypi/pyversions/pytube.svg
   :alt: Python Versions
   :target: https://pypi.python.org/pypi/pytube/
@@ -45,44 +41,6 @@ Download using pip via pypi.
 .. code:: bash
 
     pip install pytube
-
-
-Command-line usage
-==================
-
-You can download a video by simply passing the ``-e`` (or ``--extension=``) switch and
-setting it to the desired filetype:
-
-.. code:: bash
-
-   $ pytube -e mp4 http://www.youtube.com/watch?v=Ik-RsDGPI5Y
-
-
-Same thing for specifying a resolution:
-
-.. code:: bash
-
-   $ pytube -r 720p http://www.youtube.com/watch?v=Ik-RsDGPI5Y
-
-
-You can also specify a download file path (``-p`` or ``--path=``):
-
-.. code:: bash
-
-   $ pytube -e mp4 -p ~/Downloads/ http://www.youtube.com/watch?v=Ik-RsDGPI5Y
-
-and/or optionally choose the filename (``-f`` or ``--filename=``):
-
-.. code:: bash
-
-   $ pytube -e mp4 -f Dancing Scene from Pulp Fiction http://www.youtube.com/watch?v=Ik-RsDGPI5Y
-
-You can also specify a resolution or desired filetype:
-
-.. code:: bash
-
-   $ pytube -e mp4 -r 720p http://www.youtube.com/watch?v=Ik-RsDGPI5Y
-
 
 
 Library usage
@@ -140,7 +98,7 @@ Library usage
     pprint(yt.filter(resolution='480p'))
 
     # [<Video: H.264 (.flv) - 480p>,
-    # <Video: VP8 (.webm) - 480p>]
+    #  <Video: VP8 (.webm) - 480p>]
 
     # To select a video by a specific resolution and filetype you can use the get
     # method.
@@ -162,7 +120,7 @@ Library usage
     # <Video: VP8 (.webm) - 360p>,
     # <Video: VP8 (.webm) - 480p>]
 
-    # Notice we have two H.264 (.mp4) available to us... now if we try to call get()
+    # Since we have two H.264 (.mp4) available to us... now if we try to call get()
     # on mp4...
 
     video = yt.get('mp4')
@@ -171,9 +129,41 @@ Library usage
     # In this case, we'll need to specify both the codec (mp4) and resolution
     # (either 360p or 720p).
 
-    # Okay, let's download it!
-    video.download()
-
-    # Note: If you wanted to choose the output directory, simply pass it as an
-    # argument to the download method.
+    # Okay, let's download it! (a destination directory is required)
     video.download('/tmp/')
+
+Command-line usage
+==================
+
+You can download a video by simply passing the ``-e`` (or ``--extension=``) switch and
+setting it to the desired filetype:
+
+.. code:: bash
+
+   $ pytube -e mp4 http://www.youtube.com/watch?v=Ik-RsDGPI5Y
+
+
+Same thing for specifying a resolution:
+
+.. code:: bash
+
+   $ pytube -r 720p http://www.youtube.com/watch?v=Ik-RsDGPI5Y
+
+
+You can also specify a download file path (``-p`` or ``--path=``):
+
+.. code:: bash
+
+   $ pytube -e mp4 -p ~/Downloads/ http://www.youtube.com/watch?v=Ik-RsDGPI5Y
+
+and/or optionally choose the filename (``-f`` or ``--filename=``):
+
+.. code:: bash
+
+   $ pytube -e mp4 -f Dancing Scene from Pulp Fiction http://www.youtube.com/watch?v=Ik-RsDGPI5Y
+
+You can also specify a resolution or desired filetype:
+
+.. code:: bash
+
+   $ pytube -e mp4 -r 720p http://www.youtube.com/watch?v=Ik-RsDGPI5Y
