@@ -115,19 +115,36 @@ class Video(object):
                 "Interrupt signal given. Deleting incomplete video.")
 
     def download_s3(self, s3_bucket_name, video_dir='', chunk_size=8 * 1024, on_progress=None,
-                 on_finish=None):
+                 on_finish=None, acl_permission='public-read'):
         """
         Downloads video to S3
 
         :param str s3_bucket_name:
             S3 bucket name with output directory
+        :param str video_dir:
+            video directory to store the file within the bucket
+        :param int chunk_size:
+            File size (in bytes) to write to buffer at a time. By default,
+            this is set to 8 bytes.
+        :param func on_progress:
+            *Optional* function to be called every time the buffer is written
+            to. Arguments passed are the bytes recieved, file size, and start
+            datetime.
+        :param func on_finish:
+            *Optional* callback function when download is complete. Arguments
+            passed are the full path to downloaded the file.
+        :param str acl_permission:
+            *Optional* set the acl permissions for the new key saved to s3.
+        :return: tuple of s3_bucket_name, video_key_path
         """
         # Setup AWS S3 connections
         s3_connection = boto.connect_s3()
-        video_key_name = "{0}.{1}".format(self.filename, self.extension)
+        video_key_path = "{0}.{1}".format(self.filename, self.extension)
         if video_dir:
-            video_key_name = os.path.join(video_dir, video_key_name)
-        video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_name)
+            video_key_path = os.path.join(video_dir, video_key_path)
+        video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_path)
+        # Set key permissions to public read
+        video_key.set_acl(acl_permission)
 
         # Download the video
         response = urlopen(self.url)
@@ -147,13 +164,15 @@ class Video(object):
                             # TODO: We possibly want to flush the
                             # `_bytes_recieved`` buffer before we call
                             # ``on_finish()``.
-                            on_finish(path)
+                            # on_finish(path)
+                            pass
                         break
 
                     self._bytes_received += len(self._buffer)
                     dst_file.write(self._buffer)
                     if on_progress:
                         on_progress(self._bytes_received, file_size, start)
+            return s3_bucket_name, video_key_path
 
         except KeyboardInterrupt:
             # TODO: Move this into the cli, ``KeyboardInterrupt`` handling
