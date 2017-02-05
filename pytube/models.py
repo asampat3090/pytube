@@ -164,7 +164,8 @@ class Video(object):
         start = clock()
 
         try:
-            with s3open(video_key.generate_url(60), create=False) as dst_file:
+            with s3open(video_key.generate_url(60), key=aws_key, secret=aws_secret,
+                        create=False) as dst_file:
                 while True:
                     self._buffer = response.read(chunk_size)
                     # Check if the buffer is empty (aka no bytes remaining).
