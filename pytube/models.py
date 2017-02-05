@@ -114,13 +114,18 @@ class Video(object):
             raise KeyboardInterrupt(
                 "Interrupt signal given. Deleting incomplete video.")
 
-    def download_s3(self, s3_bucket_name, video_dir='', chunk_size=8 * 1024, on_progress=None,
-                 on_finish=None, acl_permission='public-read'):
+    def download_s3(self, s3_bucket_name, aws_key, aws_secret,
+                    video_dir='', chunk_size=8 * 1024, on_progress=None,
+                    on_finish=None, acl_permission='public-read'):
         """
         Downloads video to S3
 
         :param str s3_bucket_name:
             S3 bucket name with output directory
+        :param str aws_key:
+            AWS Key id for the account
+        :param str aws_secret:
+            AWS Secret Key for the account
         :param str video_dir:
             video directory to store the file within the bucket
         :param int chunk_size:
@@ -138,7 +143,8 @@ class Video(object):
         :return: tuple of s3_bucket_name, video_key_path
         """
         # Setup AWS S3 connections
-        s3_connection = boto.connect_s3()
+        s3_connection = boto.connect_s3(aws_access_key_id=aws_key,
+                                        aws_secret_access_key=aws_secret)
         # TODO: Create bucket if it doesn't exist
         video_key_path = "{0}.{1}".format(self.filename, self.extension)
         if video_dir:
