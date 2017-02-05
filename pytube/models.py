@@ -139,12 +139,15 @@ class Video(object):
         """
         # Setup AWS S3 connections
         s3_connection = boto.connect_s3()
+        # TODO: Create bucket if it doesn't exist
         video_key_path = "{0}.{1}".format(self.filename, self.extension)
         if video_dir:
             video_key_path = os.path.join(video_dir, video_key_path)
-        video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_path)
-        # Set key permissions to public read
-        video_key.set_acl(acl_permission)
+        try:
+            video_key = s3_connection.get_bucket(s3_bucket_name).new_key(video_key_path)
+        except:
+            print "S3 bucket does not exist. Cannot save file to S3"
+            return None, None
 
         # Download the video
         response = urlopen(self.url)
@@ -172,6 +175,8 @@ class Video(object):
                     dst_file.write(self._buffer)
                     if on_progress:
                         on_progress(self._bytes_received, file_size, start)
+            # Set key permissions to public read after download
+            video_key.set_acl(acl_permission)
             return s3_bucket_name, video_key_path
 
         except KeyboardInterrupt:
